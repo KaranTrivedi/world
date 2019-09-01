@@ -1,0 +1,21 @@
+[Unit]
+Description=Service
+#After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/projects/world/venv/bin/python3 /projects/world/bin/world.py
+ExecReload=/bin/kill -HUP 
+User=karan
+Group=karan
+
+Restart=always
+TimeoutStartSec=10
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+
+#sudo mv . /lib/systemd/system/
+#sudo sysmtemctl enable world.py
+

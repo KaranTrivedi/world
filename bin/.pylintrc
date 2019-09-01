@@ -1,0 +1,7 @@
+﻿[MASTER]
+
+optimize-ast=no
+extension-pkg-whitelist=cv2
+
+#[REPORTS]
+#reports=yes
