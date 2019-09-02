@@ -4,6 +4,7 @@
 Generate world.
 '''
 
+import os
 import random
 import time
 import timeit
@@ -11,6 +12,15 @@ import timeit
 import cv2
 import noise
 import numpy as np
+
+
+scale = 100.0
+octaves = 7
+persistence = 0.6
+lacunarity = 2.0
+seed = random.randint(0, 100)
+displace = random.randint(0, 500000)
+shape = (1080, 1920)
 
 #from PIL import Image
 
@@ -23,55 +33,14 @@ class World():
     #Animals would spawn x,y,z bound.
     #translate output to image function
 
-    terrains = {
-        "deep"    : [0, 0, 89],
-        "water"   : [65, 105, 225],
-        "grass"   : [34, 139, 34],
-        "beach"   : [238, 214, 175],
-        "mountain": [150, 75, 0],
-        "snow"    : [255, 255, 255]
-    }
-    critter = {
-        "rabbit": [0, 0, 0],
-        "wolf"  : [255, 255, 255]
-    }
-
     def __init__(self, x_len, y_len):
         '''
         Initialize world.
         '''
-        start = timeit.default_timer()
 
-        self.shape = (x_len, y_len)
-        self.scale = 100.0
-        self.octaves = 7
-        self.persistence = 0.6
-        self.lacunarity = 2.0
+        coord = coords(x_len, y_len)
 
-        #self.land = [[0 for i_it in range(self.shape[1])] for j_it in range(self.shape[0])]
-
-        self.land = np.zeros((self.shape))
-        print(self.land)
-
-        self.seed = random.randint(0, 100)
-        displace = random.randint(0, 500000)
-
-        for i_it in range(self.shape[0]):
-            for j_it in range(self.shape[1]):
-                z_val = noise.pnoise2((i_it+displace)/self.scale,
-                                        (j_it+displace)/self.scale,
-                                        octaves=self.octaves,
-                                        persistence=self.persistence,
-                                        lacunarity=self.lacunarity,
-                                        repeatx=self.shape[0],
-                                        repeaty=self.shape[1],
-                                        base=self.seed
-                                        )
-                self.land[i_it][j_it] = z_val
-                #print(i_it, j_it)
-                #print(self.land[i_it][j_it])
-        end = timeit.default_timer()
-        print("__init__ time: ", end-start)
+        self.image = map(world_perlin, coord)
 
     def get_feature(self, x, y):
         '''
@@ -105,34 +74,42 @@ class World():
     def generate(self, img=None, coords=None):
         '''
         Generate image.
-        This could be sped up by looking up only a list of pixels that have not yet been assigned.
         Pass image and only update certain values.
         '''
-        if img is None:
-            img = np.zeros((self.shape)+(3,))
+        start = timeit.default_timer()
+        img = np.zeros((shape)+(3,))
 
-            for x in range(self.shape[0]):
-                for y in range(self.shape[1]):
-                    try:
-                        img[x][y] = self.add_colour(self.land[x][y])[::-1]
-                    except Exception as exp:
-                        print(exp)
-                        print(x, y)
-                    #print(self.land[y][x]["terrain"])
-        else:
-            for i in coords:
-                (x, y) = i
-                try:
-                    img[x][y] = self.add_colour(self.land[x][y])
-                except Exception as exp:
-                    print(exp)
-                    print(i[0], i[1])
+        #if img is None:
+        #    img = np.zeros((self.shape)+(3,))
+        #    for x in range(self.shape[0]):
+        #        for y in range(self.shape[1]):
+        #            try:
+        #                img[x][y] = self.add_colour(self.image[x][y])[::-1]
+        #            except Exception as exp:
+        #                print(exp)
+        #                print(x, y)
+        #            #print(self.land[y][x]["terrain"])
+        #else:
+        #    for i in coords:
+        #        (x, y) = i
+        #        try:
+        #            img[x][y] = self.add_colour(self.land[x][y])
+        #        except Exception as exp:
+        #            print(exp)
+        #            print(i[0], i[1])
+
+        image = list(self.image)
+
+        for pixel in image:
+            img[pixel[0]][pixel[1]] = self.add_colour(pixel[2])[::-1]
 
         #This could be done better..
-        #filename = os.path.join(os.getcwd(), "..", "data", "{}.png".format(str(time.time())))
-        image = "/projects/world/data/" + str(time.time()) + ".jpg"
-        #image = "../data/" + str(time.time()) + ".jpg"
+        image = os.path.join(os.getcwd(), "data", "{}.png".format(str(time.time())))
+        #image = "/projects/world/data/" + str(time.time()) + ".jpg"
         cv2.imwrite(image, img)
+
+        print("generate time: ", timeit.default_timer()-start)
+
         return img
         #toimage(img).show()
 
@@ -165,11 +142,38 @@ class World():
         '''
         return self.land[x][y]["critter"]
 
+
+def world_perlin(coords):
+    '''
+    Initialize world.
+    '''
+
+    z_val = noise.pnoise2((coords[0]+displace)/scale,
+                                (coords[1]+displace)/scale,
+                                octaves=octaves,
+                                persistence=persistence,
+                                lacunarity=lacunarity,
+                                repeatx=shape[0],
+                                repeaty=shape[1],
+                                base=seed
+                                )
+        
+    return coords[0], coords[1], z_val
+
+def coords(x_axis, y_axis):
+    '''
+    Generate list of coordinates.
+    '''
+    for x_iter in range(x_axis):
+        for y_iter in range(y_axis):
+            yield x_iter, y_iter
+
 def main():
     '''
     Main function.
     '''
-    world = World(1920, 1080)
+    #world = World(1920, 1080)
+    world = World(shape[0], shape[1])
     #print(map.shape)
     world.generate()
 
