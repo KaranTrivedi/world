@@ -15,7 +15,7 @@ import numpy as np
 from PIL import Image
 #import matplotlib.pyplot as plt
 
-scale = 100.0
+scale = 75.0
 octaves = 7
 persistence = 0.575
 lacunarity = 2.0
@@ -54,25 +54,25 @@ class World():
         '''
 
         #Deep blue
-        if val < -0.25:
+        if val < 0.5:
             return  [89, 0, 0]
         #middle
-        elif val < -0.15:
+        elif val < 0.75:
             return [224, 13, 13]
         #Ocean
-        elif val < -0.05:
+        elif val < 1:
             return [225, 105, 65]
         #Beach
-        elif val < 0:
+        elif val < 2:
             return [175, 214, 238]
         #Grass
-        elif val < 0.15:
+        elif val < 5:
             return [34, 139, 34]
         #Trees
-        elif val < 0.3:
+        elif val < 15:
             return [0, 100, 0]
         #Hill
-        elif val < 0.35:
+        elif val < 30:
             return [176, 176, 176]
         #Snowcap
         else:
@@ -161,9 +161,6 @@ def world_perlin(coords):
     Initialize world.
     '''
 
-    dist_x = abs(shape[0]/2 - coords[0])
-    dist_y = abs(shape[1]/2 - coords[1])
-
     z_val = noise.pnoise2((coords[0]+displace)/scale,
                                 (coords[1]+displace)/scale,
                                 octaves=octaves,
@@ -174,11 +171,13 @@ def world_perlin(coords):
                                 base=seed
                                 )
 
-    grad = pow((dist_x - shape[0]/2), 2)/pow(shape[0]/2, 2) + pow((dist_y - shape[1]/2), 2)/pow(shape[1]/2, 2)
+    grad = pow((coords[0] - shape[0]/2), 2)/pow(shape[0]/2, 2) + pow((coords[1] - shape[1]/2), 2)/pow(shape[1]/2, 2)
 
-    if grad <= 1:
-        return coords[0], coords[1], z_val*grad
-    return coords[0], coords[1], -1
+    #if grad <= 1:
+    if not grad:
+        grad = 1
+    return coords[0], coords[1], z_val/grad
+    #return coords[0], coords[1], z_val*0.0000001
 
     #grad = pow((dist_x*dist_x + dist_y*dist_y), 0.5)
     #grad = grad/540
