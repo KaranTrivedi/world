@@ -12,17 +12,16 @@ import timeit
 import cv2
 import noise
 import numpy as np
-
+from PIL import Image
+#import matplotlib.pyplot as plt
 
 scale = 100.0
 octaves = 7
-persistence = 0.6
+persistence = 0.575
 lacunarity = 2.0
 seed = random.randint(0, 100)
 displace = random.randint(0, 500000)
 shape = (1080, 1920)
-
-#from PIL import Image
 
 class World():
     '''
@@ -54,16 +53,28 @@ class World():
         Add colour based on elevation.
         '''
 
+        #Deep blue
         if val < -0.25:
-            return  [0, 0, 89]
+            return  [89, 0, 0]
+        #middle
+        elif val < -0.15:
+            return [224, 13, 13]
+        #Ocean
         elif val < -0.05:
-            return [65, 105, 225]
+            return [225, 105, 65]
+        #Beach
         elif val < 0:
-            return [238, 214, 175]
-        elif val < 0.2:
+            return [175, 214, 238]
+        #Grass
+        elif val < 0.15:
             return [34, 139, 34]
+        #Trees
+        elif val < 0.3:
+            return [0, 100, 0]
+        #Hill
         elif val < 0.35:
-            return [150, 75, 0]
+            return [176, 176, 176]
+        #Snowcap
         else:
             return [255, 255, 255]
         #if obj["critter"]:
@@ -101,12 +112,14 @@ class World():
         image = list(self.image)
 
         for pixel in image:
-            img[pixel[0]][pixel[1]] = self.add_colour(pixel[2])[::-1]
+            img[pixel[0]][pixel[1]] = self.add_colour(pixel[2])
 
         #This could be done better..
         image = os.path.join(os.getcwd(), "data", "{}.png".format(str(time.time())))
-        #image = "/projects/world/data/" + str(time.time()) + ".jpg"
+
         cv2.imwrite(image, img)
+        print(image)
+        Image.open(image).show()
 
         print("generate time: ", timeit.default_timer()-start)
 
@@ -148,6 +161,9 @@ def world_perlin(coords):
     Initialize world.
     '''
 
+    dist_x = abs(shape[0]/2 - coords[0])
+    dist_y = abs(shape[1]/2 - coords[1])
+
     z_val = noise.pnoise2((coords[0]+displace)/scale,
                                 (coords[1]+displace)/scale,
                                 octaves=octaves,
@@ -157,8 +173,19 @@ def world_perlin(coords):
                                 repeaty=shape[1],
                                 base=seed
                                 )
-        
-    return coords[0], coords[1], z_val
+
+    grad = pow((dist_x - shape[0]/2), 2)/pow(shape[0]/2, 2) + pow((dist_y - shape[1]/2), 2)/pow(shape[1]/2, 2)
+
+    if grad <= 1:
+        return coords[0], coords[1], z_val*grad
+    return coords[0], coords[1], -1
+
+    #grad = pow((dist_x*dist_x + dist_y*dist_y), 0.5)
+    #grad = grad/540
+    #print(coords[0], coords[1], z_val*grad)
+    #sys.exit()
+
+    
 
 def coords(x_axis, y_axis):
     '''
