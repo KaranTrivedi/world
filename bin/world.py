@@ -8,14 +8,16 @@ import os
 import random
 import time
 import timeit
-
+import sys
 import cv2
 import noise
 import numpy as np
 from PIL import Image
+#from sklearn import preprocessing
+
 #import matplotlib.pyplot as plt
 
-scale = 75.0
+scale = 100
 octaves = 7
 persistence = 0.575
 lacunarity = 2.0
@@ -53,26 +55,28 @@ class World():
         Add colour based on elevation.
         '''
 
-        #Deep blue
-        if val < 0.5:
+        threshold = 0.1
+
+        #Ocean
+        if val < threshold + 0.35:
             return  [89, 0, 0]
         #middle
-        elif val < 0.75:
+        elif val <  threshold + 0.4:
             return [224, 13, 13]
-        #Ocean
-        elif val < 1:
+        #sea
+        elif val < threshold + 0.35:
             return [225, 105, 65]
         #Beach
-        elif val < 2:
+        elif val < threshold + 0.4:
             return [175, 214, 238]
         #Grass
-        elif val < 5:
+        elif val < threshold + 0.5:
             return [34, 139, 34]
         #Trees
-        elif val < 15:
+        elif val < threshold + 0.65:
             return [0, 100, 0]
         #Hill
-        elif val < 30:
+        elif val < threshold + 0.8:
             return [176, 176, 176]
         #Snowcap
         else:
@@ -87,32 +91,39 @@ class World():
         Generate image.
         Pass image and only update certain values.
         '''
+
         start = timeit.default_timer()
+        
         img = np.zeros((shape)+(3,))
 
-        #if img is None:
-        #    img = np.zeros((self.shape)+(3,))
-        #    for x in range(self.shape[0]):
-        #        for y in range(self.shape[1]):
-        #            try:
-        #                img[x][y] = self.add_colour(self.image[x][y])[::-1]
-        #            except Exception as exp:
-        #                print(exp)
-        #                print(x, y)
-        #            #print(self.land[y][x]["terrain"])
-        #else:
-        #    for i in coords:
-        #        (x, y) = i
-        #        try:
-        #            img[x][y] = self.add_colour(self.land[x][y])
-        #        except Exception as exp:
-        #            print(exp)
-        #            print(i[0], i[1])
-
         image = list(self.image)
+        height = [img[2] for img in image]
 
-        for pixel in image:
-            img[pixel[0]][pixel[1]] = self.add_colour(pixel[2])
+        #sys.exit()
+
+        #height = np.asarray(height)
+        #norm_height = preprocessing.normalize([height]).tolist()
+
+        c=np.array(height)
+        mn = min(c)
+        mx = max(c)
+
+        norm_height = (c - mn) / (mx - mn)
+
+        print(min(norm_height))
+        print(max(norm_height))
+
+        #Load eclipse vals here. Normalize.
+
+        for index in range(len(image)):
+            x_val = image[index][0]
+            y_val = image[index][1]
+            z_val = norm_height[index] #image[index][2]
+
+            #z_val *= eclipse[index][2]
+
+            img[x_val][y_val] = self.add_colour(z_val)
+            #image[index][2] = norm_height[index]
 
         #This could be done better..
         image = os.path.join(os.getcwd(), "data", "{}.png".format(str(time.time())))
@@ -123,7 +134,7 @@ class World():
 
         print("generate time: ", timeit.default_timer()-start)
 
-        return img
+        #return img
         #toimage(img).show()
 
     def get_spaces(self):
@@ -171,20 +182,20 @@ def world_perlin(coords):
                                 base=seed
                                 )
 
-    grad = pow((coords[0] - shape[0]/2), 2)/pow(shape[0]/2, 2) + pow((coords[1] - shape[1]/2), 2)/pow(shape[1]/2, 2)
+    return [coords[0], coords[1], z_val]
 
-    #if grad <= 1:
-    if not grad:
-        grad = 1
-    return coords[0], coords[1], z_val/grad
-    #return coords[0], coords[1], z_val*0.0000001
+def elipse(coords):
+    '''
+    For coordinated, generate elipse...
+    Normalise output here?
+    '''
 
-    #grad = pow((dist_x*dist_x + dist_y*dist_y), 0.5)
-    #grad = grad/540
-    #print(coords[0], coords[1], z_val*grad)
-    #sys.exit()
-
+    delta_x = coords[0]-centre_x
+    delta_y = coords[1]-centre_y
     
+    z_val = pow(delta_x, 2)/pow(centre_x, 2) + pow(delta_y, 2)/pow(centre_y, 2)
+    
+    return [coords[0], coords[1], z_val]
 
 def coords(x_axis, y_axis):
     '''
