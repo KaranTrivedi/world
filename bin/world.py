@@ -17,20 +17,18 @@ from PIL import Image
 
 #import matplotlib.pyplot as plt
 
+#shape = (1080, 10000)
+shape = (1024, 1024)
 scale = 225
+scalar = 0.9
 octaves = 7
 persistence = 0.6
 lacunarity = 2.0
 seed = random.randint(0, 100)
 displace = random.randint(0, 500000)
 
-#shape = (1080, 10000)
-shape = (1080, 1920)
-
 centre_x = shape[0]/2
 centre_y = shape[1]/2
-
-scalar = 0.9
 
 denom_x = pow(centre_x*scalar, 2)
 denom_y = pow(centre_y*scalar, 2)
@@ -239,14 +237,14 @@ def main():
     world.generate(elipse=elipse_height)
 
     print("generate time: ", timeit.default_timer()-start)
-    print("Scale: %s", scale)
-    print("octaves: %s", octaves)
-    print("persistence: %s", persistence)
-    print("lacunarity: %s", lacunarity)
-    print("seed: %s", seed)
-    print("displace: %s", displace)
-    print("Size: %s x %s", shape[0], shape[1])
-    print("scalar: %s", scalar)
+    print("Scale: ", scale)
+    print("octaves: ", octaves)
+    print("persistence: ", persistence)
+    print("lacunarity: ", lacunarity)
+    print("seed: ", seed)
+    print("displace: ", displace)
+    print("Size: %s x %s" % (shape))
+    print("scalar: ", scalar)
 
 if __name__ == "__main__":
     main()
