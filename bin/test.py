@@ -22,7 +22,6 @@ shape = (1920, 1080)
 seed = random.randint(0, 100)
 displace = random.randint(0, 500000)
 
-
 centre_x = shape[0]/2
 centre_y = shape[1]/2
 
@@ -101,20 +100,20 @@ def main():
     for index in range(len(image)):
         image[index][2] = norm_height[index]
 
-    return image
+    #return image
 
-    for index in range(len(image)):
-        x_val = image[index][0]
-        y_val = image[index][1]
-        z_val = norm_height[index] #image[index][2]
-        #z_val *= eclipse[index][2]
-        img[x_val][y_val] = float(z_val)
+    #for index in range(len(image)):
+    #    x_val = image[index][0]
+    #    y_val = image[index][1]
+    #    z_val = norm_height[index] #image[index][2]
+    #    #z_val *= eclipse[index][2]
+    #    img[x_val][y_val] = float(z_val)
 
-    image = os.path.join(os.getcwd(), "data", "{}.png".format(str(time.time())))
+    #image = os.path.join(os.getcwd(), "data", "{}.png".format(str(time.time())))
 
-    cv2.imwrite(image, img)
-    #print(image)
-    #Image.open(image).show()
+    #cv2.imwrite(image, img)
+    ##print(image)
+    ##Image.open(image).show()
     
     Image.fromarray(img).show()
     

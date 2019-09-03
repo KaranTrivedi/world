@@ -23,7 +23,14 @@ persistence = 0.575
 lacunarity = 2.0
 seed = random.randint(0, 100)
 displace = random.randint(0, 500000)
-shape = (1080, 1920)
+#shape = (1080, 1920)
+shape = (600, 600)
+
+centre_x = shape[0]/2
+centre_y = shape[1]/2
+
+denom_x = pow(centre_x, 2)*.1
+denom_y = pow(centre_y, 2)*.1
 
 class World():
     '''
@@ -55,13 +62,13 @@ class World():
         Add colour based on elevation.
         '''
 
-        threshold = 0.1
+        threshold = 0.15
 
         #Ocean
-        if val < threshold + 0.35:
+        if val < threshold + 0.25:
             return  [89, 0, 0]
         #middle
-        elif val <  threshold + 0.4:
+        elif val <  threshold + 0.3:
             return [224, 13, 13]
         #sea
         elif val < threshold + 0.35:
@@ -70,13 +77,13 @@ class World():
         elif val < threshold + 0.4:
             return [175, 214, 238]
         #Grass
-        elif val < threshold + 0.5:
+        elif val < threshold + 0.45:
             return [34, 139, 34]
         #Trees
-        elif val < threshold + 0.65:
+        elif val < threshold + 0.6:
             return [0, 100, 0]
         #Hill
-        elif val < threshold + 0.8:
+        elif val < threshold + 0.7:
             return [176, 176, 176]
         #Snowcap
         else:
@@ -86,13 +93,11 @@ class World():
 
         #return terrains[obj["terrain"]]
 
-    def generate(self, img=None, coords=None):
+    def generate(self, elipse, img=None, coords=None):
         '''
         Generate image.
         Pass image and only update certain values.
         '''
-
-        start = timeit.default_timer()
         
         img = np.zeros((shape)+(3,))
 
@@ -110,9 +115,6 @@ class World():
 
         norm_height = (c - mn) / (mx - mn)
 
-        print(min(norm_height))
-        print(max(norm_height))
-
         #Load eclipse vals here. Normalize.
 
         for index in range(len(image)):
@@ -120,7 +122,7 @@ class World():
             y_val = image[index][1]
             z_val = norm_height[index] #image[index][2]
 
-            #z_val *= eclipse[index][2]
+            z_val *= (1-elipse[index])
 
             img[x_val][y_val] = self.add_colour(z_val)
             #image[index][2] = norm_height[index]
@@ -131,8 +133,6 @@ class World():
         cv2.imwrite(image, img)
         print(image)
         Image.open(image).show()
-
-        print("generate time: ", timeit.default_timer()-start)
 
         #return img
         #toimage(img).show()
@@ -193,9 +193,9 @@ def elipse(coords):
     delta_x = coords[0]-centre_x
     delta_y = coords[1]-centre_y
     
-    z_val = pow(delta_x, 2)/pow(centre_x, 2) + pow(delta_y, 2)/pow(centre_y, 2)
+    z_val = pow(delta_x, 2)/denom_x + pow(delta_y, 2)/denom_y
     
-    return [coords[0], coords[1], z_val]
+    return z_val
 
 def coords(x_axis, y_axis):
     '''
@@ -209,10 +209,30 @@ def main():
     '''
     Main function.
     '''
+
+    start = timeit.default_timer()
+
     #world = World(1920, 1080)
     world = World(shape[0], shape[1])
     #print(map.shape)
-    world.generate()
+    eplipse_array = map(elipse, coords(shape[0], shape[1]))
+
+    #image = map(world_perlin, coords(1920, 1080))
+    #image = list(image)
+    #print(len(image))
+
+    #elipse_grad = np.zeros_like(image)
+
+    elipse_height = list(eplipse_array)
+
+    c=np.array(elipse_height)
+    mn = min(c)
+    mx = max(c)
+    norm_height = (c - mn) / (mx - mn)
+
+    world.generate(elipse=norm_height)
+
+    print("generate time: ", timeit.default_timer()-start)        
 
 if __name__ == "__main__":
     main()
