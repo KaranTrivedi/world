@@ -17,7 +17,7 @@ from PIL import Image
 
 #import matplotlib.pyplot as plt
 
-scale = 100
+scale = 225
 octaves = 7
 persistence = 0.6
 lacunarity = 2.0
@@ -30,7 +30,7 @@ shape = (1080, 1920)
 centre_x = shape[0]/2
 centre_y = shape[1]/2
 
-scalar = 1
+scalar = 0.9
 
 denom_x = pow(centre_x*scalar, 2)
 denom_y = pow(centre_y*scalar, 2)
@@ -66,15 +66,15 @@ class World():
         '''
 
         threshold = 0.0
-
+        #BGR
         #Ocean
-        if val < threshold + 0.05:
+        if val < threshold + 0.01:
             return  [89, 0, 0]
         #middle
         elif val <  threshold + 0.15:
             return [224, 13, 13]
         #sea
-        elif val < threshold + 0.35:
+        elif val < threshold + 0.375:
             return [225, 105, 65]
         #Beach
         elif val < threshold + 0.4:
@@ -83,9 +83,12 @@ class World():
         elif val < threshold + 0.5:
             return [34, 139, 34]
         #Trees
-        elif val < threshold + 0.7:
+        elif val < threshold + 0.6:
             return [0, 100, 0]
         #Hill
+        elif val < threshold + 0.7:
+            return [35, 87, 133]
+        #Mountain
         elif val < threshold + 0.8:
             return [176, 176, 176]
         #Snowcap
@@ -235,7 +238,15 @@ def main():
 
     world.generate(elipse=elipse_height)
 
-    print("generate time: ", timeit.default_timer()-start)        
+    print("generate time: ", timeit.default_timer()-start)
+    print("Scale: %s", scale)
+    print("octaves: %s", octaves)
+    print("persistence: %s", persistence)
+    print("lacunarity: %s", lacunarity)
+    print("seed: %s", seed)
+    print("displace: %s", displace)
+    print("Size: %s x %s", shape[0], shape[1])
+    print("scalar: %s", scalar)
 
 if __name__ == "__main__":
     main()
