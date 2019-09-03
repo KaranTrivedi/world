@@ -19,18 +19,21 @@ from PIL import Image
 
 scale = 100
 octaves = 7
-persistence = 0.55
-lacunarity = 3.0
+persistence = 0.6
+lacunarity = 2.0
 seed = random.randint(0, 100)
 displace = random.randint(0, 500000)
-shape = (1000, 1000)
-#shape = (600, 600)
+
+shape = (1080, 18000)
+#shape = (2160, 3860)
 
 centre_x = shape[0]/2
 centre_y = shape[1]/2
 
-denom_x = pow(centre_x*0.001, 2)
-denom_y = pow(centre_y*0.001, 2)
+scalar = 1
+
+denom_x = pow(centre_x*scalar, 2)
+denom_y = pow(centre_y*scalar, 2)
 
 class World():
     '''
@@ -62,13 +65,13 @@ class World():
         Add colour based on elevation.
         '''
 
-        threshold = 0.15
+        threshold = 0.0
 
         #Ocean
-        if val < threshold + 0.15:
+        if val < threshold + 0.05:
             return  [89, 0, 0]
         #middle
-        elif val <  threshold + 0.25:
+        elif val <  threshold + 0.15:
             return [224, 13, 13]
         #sea
         elif val < threshold + 0.35:
@@ -80,10 +83,10 @@ class World():
         elif val < threshold + 0.5:
             return [34, 139, 34]
         #Trees
-        elif val < threshold + 0.6:
+        elif val < threshold + 0.7:
             return [0, 100, 0]
         #Hill
-        elif val < threshold + 0.7:
+        elif val < threshold + 0.8:
             return [176, 176, 176]
         #Snowcap
         else:
@@ -225,12 +228,12 @@ def main():
 
     elipse_height = list(eplipse_array)
 
-    c=np.array(elipse_height)
-    mn = min(c)
-    mx = max(c)
-    norm_height = (c - mn) / (mx - mn)
+    #c=np.array(elipse_height)
+    #mn = min(c)
+    #mx = max(c)
+    #norm_height = (c - mn) / (mx - mn)
 
-    world.generate(elipse=norm_height)
+    world.generate(elipse=elipse_height)
 
     print("generate time: ", timeit.default_timer()-start)        
 
