@@ -19,7 +19,7 @@ from PIL import Image
 
 #shape = (1080, 10000)
 shape = (1024, 1024)
-scale = 225
+scale = 300 #225
 scalar = 0.9
 octaves = 7
 persistence = 0.6
@@ -51,12 +51,7 @@ class World():
 
         self.image = map(world_perlin, coord)
 
-    def get_feature(self, x, y):
-        '''
-        Return feature for coordinate.
-        '''
-        (x, y) = (self.land[x][y]["terrain"], self.land[x][y]["critter"])
-        return (x, y)
+
 
     def add_colour(self, val):
         '''
@@ -66,7 +61,7 @@ class World():
         threshold = 0.0
         #BGR
         #Ocean
-        if val < threshold + 0.01:
+        if val < threshold + 0.05:
             return  [89, 0, 0]
         #middle
         elif val <  threshold + 0.15:
@@ -89,13 +84,8 @@ class World():
         #Mountain
         elif val < threshold + 0.8:
             return [176, 176, 176]
-        #Snowcap
-        else:
-            return [255, 255, 255]
-        #if obj["critter"]:
-        #    return critter[obj["critter"].get_animal()]
-
-        #return terrains[obj["terrain"]]
+        #Return snowcap.
+        return [255, 255, 255]
 
     def generate(self, elipse, img=None, coords=None):
         '''
@@ -140,36 +130,6 @@ class World():
 
         #return img
         #toimage(img).show()
-
-    def get_spaces(self):
-        '''
-        Return list fo empty places.
-        '''
-        coords = []
-        for x in range(len(self.land)):
-            for y in range(len(self.land[x])):
-                if self.land[x][y]["terrain"] == "grass" and self.land[x][y]["critter"] is None:
-                    coords.append((x, y))
-        return coords
-
-    def add_critter(self, x, y, crit):
-        '''
-        Add animal to location.
-        '''
-        self.land[x][y]["critter"] = crit
-
-    def remove_critter(self, x, y):
-        '''
-        Remove critter from location.
-        '''
-        self.land[x][y]["critter"] = None
-
-    def get_critter(self, x, y):
-        '''
-        Return critter in location.
-        '''
-        return self.land[x][y]["critter"]
-
 
 def world_perlin(coords):
     '''
@@ -221,18 +181,9 @@ def main():
     #print(map.shape)
     eplipse_array = map(elipse, coords(shape[0], shape[1]))
 
-    #image = map(world_perlin, coords(1920, 1080))
-    #image = list(image)
-    #print(len(image))
-
     #elipse_grad = np.zeros_like(image)
 
     elipse_height = list(eplipse_array)
-
-    #c=np.array(elipse_height)
-    #mn = min(c)
-    #mx = max(c)
-    #norm_height = (c - mn) / (mx - mn)
 
     world.generate(elipse=elipse_height)
 
