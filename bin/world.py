@@ -19,18 +19,18 @@ from PIL import Image
 
 scale = 100
 octaves = 7
-persistence = 0.575
-lacunarity = 2.0
+persistence = 0.55
+lacunarity = 3.0
 seed = random.randint(0, 100)
 displace = random.randint(0, 500000)
-#shape = (1080, 1920)
-shape = (600, 600)
+shape = (1000, 1000)
+#shape = (600, 600)
 
 centre_x = shape[0]/2
 centre_y = shape[1]/2
 
-denom_x = pow(centre_x, 2)*.1
-denom_y = pow(centre_y, 2)*.1
+denom_x = pow(centre_x*0.001, 2)
+denom_y = pow(centre_y*0.001, 2)
 
 class World():
     '''
@@ -65,10 +65,10 @@ class World():
         threshold = 0.15
 
         #Ocean
-        if val < threshold + 0.25:
+        if val < threshold + 0.15:
             return  [89, 0, 0]
         #middle
-        elif val <  threshold + 0.3:
+        elif val <  threshold + 0.25:
             return [224, 13, 13]
         #sea
         elif val < threshold + 0.35:
@@ -77,7 +77,7 @@ class World():
         elif val < threshold + 0.4:
             return [175, 214, 238]
         #Grass
-        elif val < threshold + 0.45:
+        elif val < threshold + 0.5:
             return [34, 139, 34]
         #Trees
         elif val < threshold + 0.6:
@@ -182,7 +182,7 @@ def world_perlin(coords):
                                 base=seed
                                 )
 
-    return [coords[0], coords[1], z_val]
+    return (coords[0], coords[1], z_val)
 
 def elipse(coords):
     '''
