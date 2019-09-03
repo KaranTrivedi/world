@@ -24,8 +24,8 @@ lacunarity = 2.0
 seed = random.randint(0, 100)
 displace = random.randint(0, 500000)
 
-shape = (1080, 18000)
-#shape = (2160, 3860)
+#shape = (1080, 10000)
+shape = (1080, 1920)
 
 centre_x = shape[0]/2
 centre_y = shape[1]/2
