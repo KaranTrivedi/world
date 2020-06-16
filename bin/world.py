@@ -13,13 +13,9 @@ import cv2
 import noise
 import numpy as np
 from PIL import Image
-#from sklearn import preprocessing
 
-#import matplotlib.pyplot as plt
-
-#shape = (1080, 10000)
 shape = (1024, 1024)
-scale = 300 #225
+scale = 300
 scalar = 0.9
 octaves = 7
 persistence = 0.6
@@ -50,8 +46,6 @@ class World():
         coord = coords(x_len, y_len)
 
         self.image = map(world_perlin, coord)
-
-
 
     def add_colour(self, val):
         '''
@@ -92,21 +86,16 @@ class World():
         Generate image.
         Pass image and only update certain values.
         '''
-        
+
         img = np.zeros((shape)+(3,))
 
         image = list(self.image)
         height = [img[2] for img in image]
 
         #sys.exit()
-
-        #height = np.asarray(height)
-        #norm_height = preprocessing.normalize([height]).tolist()
-
         c=np.array(height)
         mn = min(c)
         mx = max(c)
-
         norm_height = (c - mn) / (mx - mn)
 
         #Load eclipse vals here. Normalize.
@@ -115,11 +104,12 @@ class World():
             x_val = image[index][0]
             y_val = image[index][1]
             z_val = norm_height[index] #image[index][2]
+            #z_val = image[index][2]
 
+            #Multiplying z val to actually add elipse.
             z_val *= (1-elipse[index])
 
             img[x_val][y_val] = self.add_colour(z_val)
-            #image[index][2] = norm_height[index]
 
         #This could be done better..
         image = os.path.join(os.getcwd(), "data", "{}.png".format(str(time.time())))
@@ -179,13 +169,12 @@ def main():
     #world = World(1920, 1080)
     world = World(shape[0], shape[1])
     #print(map.shape)
+
     eplipse_array = map(elipse, coords(shape[0], shape[1]))
-
-    #elipse_grad = np.zeros_like(image)
-
     elipse_height = list(eplipse_array)
 
     world.generate(elipse=elipse_height)
+    #world.generate(elipse=None)
 
     print("generate time: ", timeit.default_timer()-start)
     print("Scale: ", scale)
