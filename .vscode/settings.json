@@ -1,4 +1,5 @@
 {
-    "python.pythonPath": "venv/bin/python3",
-    "python.linting.pylintArgs": ["--generate-members"]
+    "python.linting.pylintArgs": [
+        "--generate-members"
+    ]
 }
