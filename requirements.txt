@@ -7,7 +7,7 @@ numpy==1.19.4
 opencv-python==4.4.0.46
 opensimplex==0.3
 pandas==1.1.4
-Pillow==8.0.1
+Pillow==8.1.1
 pkg-resources==0.0.0
 pylint==2.6.0
 pyparsing==2.4.7
