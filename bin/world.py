@@ -7,6 +7,8 @@ Generate world.
 # TODO: https://stackoverflow.com/questions/35590724/filling-color-on-image-with-python 
 # PIL.ImageDraw.floodfill
 
+# TODO: GREAT IDEA: PERLIN LINE TO CREATE CLIMATE ZONES
+
 import os
 import random
 import time
@@ -22,6 +24,9 @@ from PIL import Image, ImageFont, ImageDraw, ImageEnhance
 
 height = 1080
 width = 1920
+
+# width = 1000
+# height = 1000
 
 shape = (height, width)
 
@@ -55,46 +60,58 @@ class World:
         Initialize world.
         """
 
-        coord = coords(x_len, y_len)
+        self.coord = coords(x_len, y_len)
+        self.length = x_len
+        self.width = y_len
 
         # POOL
         start = timeit.default_timer()
-        self.image = map(world_perlin, coord)
+        self.image = map(world_perlin, self.coord)
         print("Create Noise img: ", timeit.default_timer() - start)
 
     def add_colour(self, val):
         """
         Add colour based on elevation.
         """
-
-        threshold = 0.0
-        # BGR
-        # Ocean
+        
+        # Increasing gives less land/snow.
+        threshold = 0.03
+        # RGB
+        # Ice
         if val < threshold + 0.05:
-            return [89, 0, 0]
+            return [255, 255, 255][::-1]
+        # Deep
+        if val < threshold + 0.130:
+            return [0, 30, 89][::-1]
         # middle
         elif val < threshold + 0.15:
-            return [224, 13, 13]
-        # sea
-        elif val < threshold + 0.375:
-            return [225, 105, 65]
+            return [13, 50, 224][::-1]
+        # sea 
+        elif val < threshold + 0.25:
+            return [20, 70, 255][::-1]
+        # Coast far
+        elif val < threshold + 0.33:
+            return [30, 80, 255][::-1]
+        # Coast
+        elif val < threshold + 0.37:
+            return [65, 105, 225][::-1]
         # Beach
         elif val < threshold + 0.4:
-            return [175, 214, 238]
+            return [238, 214, 175][::-1]
         # Grass
         elif val < threshold + 0.5:
-            return [34, 139, 34]
+            return [34, 139, 34][::-1]
         # Trees
         elif val < threshold + 0.6:
-            return [0, 100, 0]
+            return [0, 100, 0][::-1]
         # Hill
         elif val < threshold + 0.7:
-            return [35, 87, 133]
+            return [133, 87, 35][::-1]
         # Mountain
         elif val < threshold + 0.8:
-            return [176, 176, 176]
+            return [176, 176, 176][::-1]
         # Return snowcap.
-        return [255, 255, 255]
+        return [255, 255, 255][::-1]
 
     def generate(self, elipse=None, img=None, coords=None):
         """
@@ -168,7 +185,7 @@ def generate_elipse(coords):
     centre_y = shape[1] / 2
 
     denom_x = pow(centre_x, 2)
-    denom_y = pow(centre_y, 2.2)
+    denom_y = pow(centre_y, 2.05)
 
     delta_x = coords[0] - centre_x
     delta_y = coords[1] - centre_y
@@ -186,9 +203,8 @@ def write_image(path, image):
         image (list): image object.
     """
 
-    cv2.imwrite(path, image)
     print(path)
-    # Image.open(image_path).show()
+    cv2.imwrite(path, image)
 
 def coords(x_axis, y_axis):
     """
@@ -204,16 +220,28 @@ def add_border():
 
     map_image = Image.open(str(images_path / "test.png"))
     border_image = Image.open(str(images_path / "border2.jpg"))
+    rose_image = Image.open(str(images_path / "rose.png"))
 
-    border_resize = 75
-    border_image = border_image.resize((border_resize, border_resize))
+    rose_size = 200
+    border_resize = 0
+    # border_resize = 75
+    rose_spacing = 15
 
-    for y in range(int(map_image.size[1]/border_resize)+1):
-        map_image.paste(border_image, (0, y*border_resize))
-        map_image.paste(border_image, (width-border_resize, y*border_resize))
+    # border_image = border_image.resize((border_resize, border_resize))
+    rose_image = rose_image.resize((rose_size, rose_size))
 
-    border_image = border_image.rotate(90)
-    #image brightness enhancer
+    # for y in range(int(map_image.size[1]/border_resize)+1):
+    #     map_image.paste(border_image, (0, y*border_resize))
+    #     map_image.paste(border_image, (width-border_resize, y*border_resize))
+
+    # map_image.paste(rose_image, (map_image.size[0]-rose_size-border_resize,\
+    #     0), rose_image)
+
+    map_image.paste(rose_image, (int(map_image.size[0]/2 -rose_size/2), int(map_image.size[1]/2 -rose_size/2)), rose_image)
+
+    # border_image = border_image.rotate(90)
+
+    # image brightness enhancer
     enhancer = ImageEnhance.Brightness(border_image)
 
     # factor = 1 #gives original image
@@ -221,11 +249,11 @@ def add_border():
     factor = 1.5 #brightens the image
     border_image = enhancer.enhance(factor)
 
-    for x in range(int(map_image.size[0]/border_resize)+1):
-        map_image.paste(border_image, (x*border_resize, 0))
-        map_image.paste(border_image, (x*border_resize, height-border_resize))
+    # for x in range(int(map_image.size[0]/border_resize)+1):
+    #     map_image.paste(border_image, (x*border_resize, 0))
+    #     map_image.paste(border_image, (x*border_resize, height-border_resize))
 
-    font_colour = (255,255,255)
+    font_colour = (0, 0, 0)
     # font = ImageFont.truetype("/usr/share/fonts/dejavu/DejaVuSans.ttf", 25)
     draw = ImageDraw.Draw(map_image)
     draw.text((border_resize, height-border_resize-10), f"Scale: {scale}", font_colour)
@@ -266,7 +294,6 @@ def main():
     # generated_image = world.generate()
 
     # Need to add rivers?
-    # Need to add legend?
 
     write_image(str(images_path / "test.png"), generated_image)
 
